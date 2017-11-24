@@ -37,9 +37,10 @@ question_name <-
 max_answer_alternative <- 
   unlist(data[which(data$V2 == "Uiterste"),3:dim(data)[2]])
 
-# Raw question names and answers
+# Raw question names and answers. 
+# Look up the first 1 in the first column, start taking every second row till the end. 
 names_and_answers <-
-  data[seq(which(data$V2 == "QId") + 1,dim(data)[1],by = 2),2:dim(data)[2]]
+  data[seq(which(data$V1 == 1)[1], dim(data)[1],by = 2),2:dim(data)[2]]
 
 # Student names
 names <- names_and_answers$V2
@@ -54,7 +55,10 @@ na_columns <- which(apply(answers,2,function(x) sum(is.na(x)) == dim(answers)[1]
 
 mc_columns <- which(apply(answers,2,function(x) any(grepl("[A-Z]{1}",x))))
 
-if(length(mc_columns) == 0) stop("NO MC QUESTIONS")
+# Stop if no mc questions.
+
+checkForMc <- function(mc_columns) if(length(mc_columns) == 0) stop("NO MC QUESTIONS")
+checkForMc(mc_columns)
 
 other_columns <- which(apply(answers,2, function(x) sum(grepl("-2|^$",x)) == dim(answers)[1]))
 
@@ -72,15 +76,17 @@ correct_answer_only <- correct_answer[mc_columns]
 sum_scored_mc_answers <- apply(t(t(mc_answers) == correct_answer_only),1, sum)
 
 sum_other_answers <- rowSums(sapply(answers[ , other_columns],as.numeric))
+
+# Do not add other answers if there are none. 
+
 if(any(is.na(sum_other_answers))) {
- 
+  total_score = sum_scored_mc_answers
 } else {
    total_score = sum_other_answers + sum_scored_mc_answers
 }
 
 
 # Calculating the RAT
-
 
 max_answer_alternative_filtered <-
   max_answer_alternative[mc_columns]
