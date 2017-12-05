@@ -21,7 +21,7 @@ rm(list = ls())
 #### HIER HET PAD NAAR DE INPUT FILE INVULLEN ####
 
 data <- 
-  read.table(file = "input/testinputfile.csv",header = FALSE,as.is = TRUE,fill = TRUE,sep = ",", comment.char = "")
+  read.table(file = "input/20171110 WSR Deeltoets 2 7202A609XY-2.csv",header = FALSE,as.is = TRUE,fill = TRUE,sep = ",", comment.char = "",quote = "\"")
 
 # Extract correct answers
 
@@ -51,24 +51,21 @@ answers <- names_and_answers[ , -1]
 names(answers) <- question_name
 
 # All answer columns consisting only of NA
-na_columns <- which(apply(answers,2,function(x) sum(is.na(x)) == dim(answers)[1]))
+mc_columns <- which(grepl("[A-Z]{1}",correct_answer))
+question_name_columns <- which(grepl("[A-Z]",question_name))
 
-mc_columns <- which(apply(answers,2,function(x) any(grepl("[A-Z]{1}",x))))
+open_question_columns <- question_name_columns[!(question_name_columns %in% mc_columns)]
 
 # Stop if no mc questions.
 
 checkForMc <- function(mc_columns) if(length(mc_columns) == 0) stop("NO MC QUESTIONS")
 checkForMc(mc_columns)
 
-other_columns <- which(apply(answers,2, function(x) sum(grepl("-2|^$",x)) == dim(answers)[1]))
+other_columns <- open_question_columns -1 
 
-if(any(other_columns == 1)){
- other_columns <- other_columns[-which(other_columns == 1)]
-}
-
-other_columns <- other_columns[!((other_columns - 1) %in% mc_columns)]
-
-other_columns <- other_columns - 1
+# if(any(other_columns == 1)){
+#  other_columns <- other_columns[-which(other_columns == 1)]
+# }
 
 # Calculating the total score
 mc_answers <- answers[ , mc_columns]
